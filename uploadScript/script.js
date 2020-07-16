@@ -7,24 +7,42 @@ var file = "./sample.docx";
 var onedrive_folder = "Geminid";
 var onedrive_filename = "sample.docx";
 
-// Replace the following files as per the documentation
+// Replace the following variables as per the documentation
 var onedrive_client_id = "insert-here";
 var onedrive_client_secret = "insert-here";
 var onedrive_refresh_token = "insert-here";
 
-function uploadFile(error, response, body) {
+function shareURL(token) {
+    request.post(
+        {
+            url: `https://graph.microsoft.com/v1.0/me/drive/items/root:/${onedrive_folder}/${onedrive_filename}:/createLink`,
+            headers: {
+                Authorization: `bearer ${token}`,
+                "Content-Type": mime.getType(file),
+                "type": "edit",
+                "scope": "anonymous"
+            },
+        },
+        function(er, re, bo) {
+            console.log(JSON.parse(bo).link.webUrl)
+        }
+    )
+}
+
+function uploadFile(token) {
   fs.readFile(file, function read(e, f) {
     request.put(
       {
-        url: `https://graph.microsoft.com/v1.0/drive/root:/${onedrive_folder}/${onedrive_filename}:/content`,
+        url: `https://graph.microsoft.com/v1.0/me/drive/root:/${onedrive_folder}/${onedrive_filename}:/content`,
         headers: {
-          Authorization: `bearer ${JSON.parse(body).access_token}`,
+          Authorization: `bearer ${token}`,
           "Content-Type": mime.getType(file),
         },
         body: f,
       },
       function (er, re, bo) {
-        confole.log(bo);
+        console.log(bo);
+        shareURL(token);
       }
     );
   });
@@ -42,6 +60,6 @@ request.post(
     },
   },
   function (error, response, body) {
-    uploadFile(response);
+    uploadFile(JSON.parse(body).access_token);
   }
 );
