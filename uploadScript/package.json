@@ -1,0 +1,14 @@
+{
+  "name": "uploadscript",
+  "version": "1.0.0",
+  "description": "This App uploads Files progamtically to a user's onedrive",
+  "main": "helloNode.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "pratyush pandey",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
