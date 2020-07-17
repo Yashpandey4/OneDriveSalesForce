@@ -19,18 +19,18 @@ Registering your web application is the first step.
 
 ## Configure and run the app
 
-1. Update [```script.js/onedrive_client_id```](script.js#L11) with your app id
-2. Update [```script.js/onedrive_client_secret```](script.js#L12) with your app secret
-3. Update [```script.js/onedrive_refresh_token```](script.js#L13) with your application's redirect uri
+1. Update [`script.js/onedrive_client_id`](script.js#L11) with your app id
+2. Update [`script.js/onedrive_client_secret`](script.js#L12) with your app secret
+3. Update [`script.js/onedrive_refresh_token`](script.js#L13) with your application's redirect uri
 
 Prerequisites
-* [```node```](https://nodejs.org/en/) - JavaScript runtime built on Chrome V8
-* [```npm```](https://docs.npmjs.com/getting-started/installing-node) - Node Package Manager
+* [`node`](https://nodejs.org/en/) - JavaScript runtime built on Chrome V8
+* [`npm`](https://docs.npmjs.com/getting-started/installing-node) - Node Package Manager
 
 To run the app, type the following into your command line:
 
-1. ```npm install``` - install application dependencies
-2. ```npm start``` - starts the application server
+1. `npm install` - install application dependencies
+2. `npm start` - starts the application server
 
 ## Launch the app in your browser
-Once the application server has been started, open your favorite web browser to ```http://localhost:3000```
+Once the application server has been started, open your favorite web browser to `http://localhost:3000`
