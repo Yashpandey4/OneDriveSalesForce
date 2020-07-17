@@ -1,78 +1,83 @@
 const fetch = require("node-fetch");
 const fs = require("fs");
-const mime = require("mime");
-const request = require("request");
 
-var file = "./sample.docx";
-var onedrive_folder = "Geminid";
-var onedrive_filename = "sample.docx";
+let file = "./sample.docx";
+let onedrive_folder = "Geminid";
+let onedrive_filename = "sample.docx";
 
 // Replace the following variables as per the documentation
-var onedrive_client_id = "insert-here";
-var onedrive_client_secret = "insert-here";
-var onedrive_refresh_token = "insert-here";
-
-async function main() {
-    try {
-        var auth_response = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
-            method: "POST",
-            body: new URLSearchParams({
-                redirect_uri: "http://localhost/dashboard",
-                client_id: onedrive_client_id,
-                client_secret: onedrive_client_secret,
-                refresh_token: onedrive_refresh_token,
-                grant_type: "refresh_token",
-            }).toString(),
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-        var data = await response.json();
-        var token = data.access_token;
-        uploadFile(token);
-        shareURL(token);
-    }
-    catch(err) {
-        console.log(`Auth failed: ${err}`);
-    }
-    
+const ONEDRIVE_CONIFG = {
+	clientId: "<client id>",
+	clientSecret: "<client secret>",
+	refreshToken: "<refresh token>"
 }
 
-async function uploadFile(token) {
-    fs.readFile(file, function read(e, f) {
-        try {
-            var upload_response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:/${onedrive_folder}/${onedrive_filename}:/content`, {
-                method: "PUT",
-                body: f,
-                headers: {
-                    Authorization: `bearer ${token}`,
-                    "Content-Type": mime.getType(file),
-                }
-            })
-            console.log(`File uploaded successfully! ${upload_response.json()}`);
-        }
-        catch(er) {
-            console.log(`Upload failed: ${err}`);
-        }
-    });
-  }
-
-async function shareURL(token) {
-    try {
-        var share_response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/root:/${onedrive_folder}/${onedrive_filename}:/createLink`, {
-            method: 'POST',
-            headers: {
-                Authorization: `bearer ${token}`,
-                "Content-Type": mime.getType(file),
-                "type": "edit",
-                "scope": "anonymous"
-            }
-        });
-        var data = await share_response.json();
-        console.log(`Shared URL of the File uploaded is ${data.link.webUrl}`);
-    }
-    catch(er) {
-        console.log(`Share failed: ${err}`);
-    }
+const BASE_UPLOAD_URL = "https://graph.microsoft.com/v1.0/me/drive/root:";
+async function uploadFile(){
+	let url = `${BASE_UPLOAD_URL}/${onedrive_folder}/${onedrive_filename}:/content`;
+	return sendApiRequest(url, {
+		method: "PUT",
+		body: fs.readFileSync(file)
+	});
 }
 
+const BASE_SHARE_URL = "https://graph.microsoft.com/v1.0/me/drive/items/root:";
+async function shareURL(){
+	let url = `${BASE_SHARE_URL}/${onedrive_folder}/${onedrive_filename}:/createLink`;
+	return sendApiRequest(url, {
+		method: "POST",
+		headers: {
+			"type": "edit",
+			"scope": "anonymous"
+		}
+	});
+}
+
+
+let AUTH_TOKEN;
+const LOGIN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+async function getAuthToken(){
+	if(!AUTH_TOKEN)
+		AUTH_TOKEN = await fetch(LOGIN_URL, {
+			method: "POST",
+			
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			
+			body: new URLSearchParams({
+				redirect_uri: "http://localhost/dashboard",
+				client_id: ONEDRIVE_CONIFG.clientId,
+				client_secret: ONEDRIVE_CONIFG.clientSecret,
+				refresh_token: ONEDRIVE_CONIFG.refreshToken,
+				grant_type: "refresh_token",
+			}).toString()
+		})
+		.then(e => e.json());
+	
+	return AUTH_TOKEN;
+}
+
+async function sendApiRequest(url, options){
+	if(!options.headers)
+		options.headers = {};
+	
+	if(typeof options.body == "object")
+		options.body = JSON.stringify(options.body);
+	
+	let token = await getAuthToken()
+	options.headers["Authorization"] = token.access_token;
+	options.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+	
+	return fetch(url, options)
+			.then(e => e.json());
+}
+
+async function main(){
+	let uploadResponse = await uploadFile();
+	console.log(uploadResponse);
+	
+	let shareResponse = await shareURL();
+	console.log(shareResponse);
+}
+main();
