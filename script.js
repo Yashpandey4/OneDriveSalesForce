@@ -12,18 +12,18 @@ const ONEDRIVE_CONIFG = {
   refreshToken: "<refresh token>",
 };
 
-const BASE_UPLOAD_URL = "https://graph.microsoft.com/v1.0/me/drive/root:";
+const BASE_URL = "https://graph.microsoft.com/v1.0/me/drive";
+
 async function uploadFile() {
-  let url = `${BASE_UPLOAD_URL}/${onedrive_folder}/${onedrive_filename}:/content`;
+  let url = `${BASE_URL}/root:/${onedrive_folder}/${onedrive_filename}:/content`;
   return sendApiRequest(url, {
     method: "PUT",
     body: fs.readFileSync(file),
   });
 }
 
-const BASE_SHARE_URL = "https://graph.microsoft.com/v1.0/me/drive/items/root:";
 async function shareURL() {
-  let url = `${BASE_SHARE_URL}/${onedrive_folder}/${onedrive_filename}:/createLink`;
+  let url = `${BASE_URL}/items/root:/${onedrive_folder}/${onedrive_filename}:/createLink`;
   return sendApiRequest(url, {
     method: "POST",
     headers: {
@@ -33,9 +33,8 @@ async function shareURL() {
   });
 }
 
-const BASE_DELETE_URL = "https://graph.microsoft.com/v1.0/me/drive/items/root:";
 async function deleteURL(permId) {
-  let url = `${BASE_DELETE_URL}/${onedrive_folder}/${onedrive_filename}:/permissions/${permId}`;
+  let url = `${BASE_URL}/items/root:/${onedrive_folder}/${onedrive_filename}:/permissions/${permId}`;
   return sendApiRequest(url, {
     method: "DELETE"
   });
